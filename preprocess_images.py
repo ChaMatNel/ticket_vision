@@ -67,15 +67,18 @@ def process_images(input_folder, output_folder, size=800):
             # Resize to square
             square_image = resize_to_square(cropped_image, size)
 
-            # Save the result
+            # Define output path
             output_path = os.path.join(output_folder, filename)
-            cv2.imwrite(output_path, square_image)
 
-            print(f"Processed and saved: {output_path}")
+            # Save the processed image in the output folder
+            cv2.imwrite(output_path, square_image)
+            print(f"Processed and moved to: {output_folder}")
 
 # Define folder paths
-input_folder = r"C:\Users\chada\OneDrive\Desktop\ticket_vision\data\images\holder"
-output_folder = r"C:\Users\chada\OneDrive\Desktop\ticket_vision\data\images\holder"
+#main_folder = r"C:\Users\chada\OneDrive\Desktop\ticket_vision\Games"
 
-# Run the function
-process_images(input_folder, output_folder, size=800)
+# Loop through each game file and run the process_images function on all unprocessed images
+#for game in os.listdir(main_folder):
+    #game_path = os.path.join(main_folder, game) # Create folder path variable to the game
+    #if os.path.isdir(game_path):
+        #process_images(game_path, game_path, size=800)

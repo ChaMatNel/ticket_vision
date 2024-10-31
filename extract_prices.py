@@ -13,6 +13,7 @@ from preprocess_images import process_images
 from run_model import run_model
 from run_ocr import run_ocr
 from transform_game_dataframe import transform_game_dataframe
+from perform_quality_check import quality_check
 
 
 # Define folder path
@@ -41,6 +42,8 @@ for game in os.listdir(main_folder):
                 print(game_details)
                 final_game_details = transform_game_dataframe(game_details)
 
+                #final_game_details = quality_check(final_game_details)
+
                 # Define output file path
                 file_path = f'{game_path}\{game}.xlsx'
 
@@ -48,8 +51,8 @@ for game in os.listdir(main_folder):
                 try:
                     # Load the existing workbook and append
                     with pd.ExcelWriter(file_path, engine='openpyxl', mode='a', if_sheet_exists='new') as writer:
-                        final_game_details.to_excel(writer, sheet_name='Sheet1', index=False)
+                        final_game_details.to_excel(writer, sheet_name=image, index=False)
                 except FileNotFoundError:
                     # If the file does not exist, create a new file
                     with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
-                        final_game_details.to_excel(writer, sheet_name='Sheet1', index=False)
+                        final_game_details.to_excel(writer, sheet_name=image, index=False)

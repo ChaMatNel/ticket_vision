@@ -26,4 +26,4 @@ def quality_check(dataframe):
                     print('Invalid input')
             dataframe.at[index, 'price'] = new_price  # Overwrite the 'price' column
             cv2.destroyAllWindows()
-
+    return dataframe

@@ -42,7 +42,7 @@ for game in os.listdir(main_folder):
                 print(game_details)
                 final_game_details = transform_game_dataframe(game_details)
 
-                #final_game_details = quality_check(final_game_details)
+                final_game_details = quality_check(final_game_details)
 
                 # Define output file path
                 file_path = f'{game_path}\{game}.xlsx'

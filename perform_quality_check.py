@@ -17,6 +17,7 @@ def quality_check(dataframe):
             # Display the snippet
             cv2.imshow("Image Snippet", cut_snippet)
             cv2.waitKey(0)
+            print(f"confirm the price {row['price']} is accurate")
             
             while True:
                 try:

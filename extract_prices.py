@@ -30,10 +30,18 @@ for game in os.listdir(main_folder):
     game_path = os.path.join(main_folder, game) # Create folder path variable to the game
     if os.path.isdir(game_path):
         
+        # Check for Excel files in the specified directory
+        excel_files = [f for f in os.listdir(game_path) if f.endswith(('.xlsx', '.xls'))]
+
+        if excel_files:
+            # If there are Excel files, load the first one
+            file_to_load = os.path.join(game_path, excel_files[0])
+            game_df = pd.read_excel(file_to_load)  # Load the Excel file into a DataFrame
+        else:
+            game_df = pd.DataFrame(columns=["file_path", "object_name", "x_min", "y_min", "x_max", "y_max", "confidence", "img_height", "img_width", "price", "seat_location", "distance_to_center", "deal_score"])
+        
         #process image
         process_images(game_path, game_path, size=800)
-
-        game_df = pd.DataFrame(columns=["file_path", "object_name", "x_min", "y_min", "x_max", "y_max", "confidence", "img_height", "img_width", "price", "seat_location", "distance_to_center", "deal_score"])
 
         for image in os.listdir(game_path):
             if os.path.join(game_path, image).endswith('.png'):
@@ -46,6 +54,13 @@ for game in os.listdir(main_folder):
                 final_snapshot_df = quality_check(snapshot_df)
 
                 game_df = pd.concat([game_df, final_snapshot_df], ignore_index=True)
+
+                processed_path = os.path.join(game_path,'processed')
+                os.makedirs(processed_path, exist_ok=True)
+                processed_image_path = os.path.join(processed_path, image)
+                os.rename(image_path, processed_image_path) 
+
+
 
         # Define output file path
         file_path = f'{game_path}\{game}.xlsx'

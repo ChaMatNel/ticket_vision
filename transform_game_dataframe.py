@@ -39,6 +39,14 @@ def transform_game_dataframe(dataframe):
     dataframe['price'] = dataframe['price'].astype(float)  # Convert to float first if decimals are present
     dataframe['price'] = dataframe['price'].fillna(0).astype(int)
 
+    #create deal score
     dataframe['deal_score'] = dataframe['distance_to_center']*dataframe['price'] # Smaller is better
+
+    # Create time columns
+    dataframe['game_date'] = dataframe['file_path'].apply(lambda x: x.split("\\")[-2].split('_')[-1])
+    dataframe['snapshot_date'] = dataframe['file_path'].apply(lambda x: x.split("\\")[-1].strip('.png'))
+    dataframe['game_date'] = pd.to_datetime(dataframe['game_date'], format="%Y-%m-%d-%I-%M-%p")
+    dataframe['snapshot_date'] = pd.to_datetime(dataframe['snapshot_date'], format="%Y-%m-%d-%I-%M-%p")
+    dataframe['days_to_game'] = (dataframe['game_date'] - dataframe['snapshot_date']).dt.days
 
     return dataframe

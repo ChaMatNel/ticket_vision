@@ -33,26 +33,29 @@ for game in os.listdir(main_folder):
         #process image
         process_images(game_path, game_path, size=800)
 
+        game_df = pd.DataFrame(columns=["file_path", "object_name", "x_min", "y_min", "x_max", "y_max", "confidence", "img_height", "img_width", "price", "seat_location", "distance_to_center", "deal_score"])
+
         for image in os.listdir(game_path):
             if os.path.join(game_path, image).endswith('.png'):
                 image_path = os.path.join(game_path, image)
                 print(image_path)
-                df_detections = run_model(image_path)
-                game_details = run_ocr(df_detections)
-                print(game_details)
-                final_game_details = transform_game_dataframe(game_details)
+                detections_df = run_model(image_path)
+                detections_prices_df = run_ocr(detections_df)
+                snapshot_df = transform_game_dataframe(detections_prices_df)
 
-                final_game_details = quality_check(final_game_details)
+                final_snapshot_df = quality_check(snapshot_df)
 
-                # Define output file path
-                file_path = f'{game_path}\{game}.xlsx'
+                game_df = pd.concat([game_df, final_snapshot_df], ignore_index=True)
 
-                # Check if the file exists to append
-                try:
-                    # Load the existing workbook and append
-                    with pd.ExcelWriter(file_path, engine='openpyxl', mode='a', if_sheet_exists='new') as writer:
-                        final_game_details.to_excel(writer, sheet_name=image, index=False)
-                except FileNotFoundError:
-                    # If the file does not exist, create a new file
-                    with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
-                        final_game_details.to_excel(writer, sheet_name=image, index=False)
+        # Define output file path
+        file_path = f'{game_path}\{game}.xlsx'
+
+        # Check if the file exists to append
+        try:
+            # Load the existing workbook and append
+            with pd.ExcelWriter(file_path, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+                game_df.to_excel(writer, sheet_name=image, index=False)
+        except FileNotFoundError:
+            # If the file does not exist, create a new file
+            with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+                game_df.to_excel(writer, sheet_name=image, index=False)

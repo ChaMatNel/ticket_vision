@@ -19,15 +19,11 @@ def run_model(img_path):
 
     # Extract results into a pandas DataFrame
     boxes = results.pandas().xyxy[0]  # Get bounding box results
-
-    # create timestamp
-    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             
     # Add image path and required details for each detected object
     for i, row in boxes.iterrows():
         detection_data = {
             "file_path": img_path,
-            "timestamp": timestamp,  # Add timestamp here
             "object_name": row["name"],
             "x_min": row["xmin"],
             "y_min": row["ymin"],

@@ -7,6 +7,7 @@ def run_ocr(df_detections):
     # Add a new column for the price that will be extracted with OCR
     #df_detections['img_height'] = 0
     #df_detections['img_width'] = 0
+    df_detections["ocr_conf"] = ""
     df_detections["price"] = ""
 
     # Iterate through each bounding box in the detections dataframe
@@ -32,15 +33,21 @@ def run_ocr(df_detections):
         snippet_binarized = enlarged_snippet.convert('L').point(lambda p: 0 if p <= 115 else 255) # 115 seems to be sweetspot
 
         # Run OCR on the processed snippet
-        text = pytesseract.image_to_string(snippet_binarized, config='--psm 6 -c tessedit_char_whitelist=$0123456789li|').strip()  # Adjust `psm` mode if needed
-        text = text.replace(" ", "_").replace("l", "1").replace("i", "1").replace("|", "1").replace("\n", "") # Replace characters that are similar to "1" with "1"
+        ocr_data = pytesseract.image_to_data(snippet_binarized, config='--psm 6 -c tessedit_char_whitelist=$0123456789li|', output_type=pytesseract.Output.DICT)
+        text = ''.join(ocr_data['text']).replace("l", "1").replace("i", "1").replace("|", "1")
+        valid_confidences = [x for x in ocr_data['conf'] if x != -1]
+        confidence_score = min(valid_confidences) if valid_confidences else 0
+
+        #text = text.replace(" ", "_").replace("l", "1").replace("i", "1").replace("|", "1").replace("\n", "") # Replace characters that are similar to "1" with "1"
 
         # Handle cases where OCR fails to detect text
         if text == "":
-            text = "unreadable"
+            text = 99999 # Set to really high value that can be easily identified and manually corrected later
         
         # Add the OCR result to the DataFrame
         df_detections.at[index, "price"] = text.strip()
+        df_detections.at[index, "ocr_conf"] = confidence_score
+
 
         # Restart the loop at the next row
     

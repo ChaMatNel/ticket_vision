@@ -18,7 +18,7 @@ from perform_quality_check import quality_check
 
 
 # Define folder path
-main_folder = r"C:\Users\chada\OneDrive\Desktop\ticket_vision\Games"
+main_folder = r"C:\Users\chada\OneDrive\Desktop\ticket_vision\test_games"
 
 # Load the YOLOv5 model
 model = torch.hub.load('ultralytics/yolov5', 'custom', path=r'C:\Users\chada\OneDrive\Desktop\ticket_vision\models\yolov5\runs\train\model_b1_e105\weights\best.pt')
@@ -41,7 +41,7 @@ for game in os.listdir(main_folder):
 
         else:
             # If there isn't an Excel file, create a new pandas dataframe that will later be exported as an excel file
-            game_df = pd.DataFrame(columns=["file_path", "object_name", "x_min", "y_min", "x_max", "y_max", "confidence", "img_height", "img_width", "price", "seat_location", "distance_to_center", "deal_score"])
+            game_df = pd.DataFrame(columns=["file_path", "object_name", "x_min", "y_min", "x_max", "y_max", "confidence", "img_height", "img_width","ocr_conf", "price", "seat_location", "distance_to_center", "deal_score"])
         
         # Run the process_images function which resizes the image to a square
         process_images(game_path, game_path, size=800)

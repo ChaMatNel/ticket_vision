@@ -3,7 +3,7 @@ import cv2
 
 def quality_check(dataframe):
     for index, row in dataframe.iterrows():
-        if row['confidence'] <= .8 or row['price'] < 10 or row['price'] > 2000:
+        if row['confidence'] <= .8 or row['price'] < 10 or row['price'] > 2000 or row['ocr_conf'] <= 80:
             # Load the image using cv2
             img_check = cv2.imread(row["file_path"])
 
@@ -26,5 +26,6 @@ def quality_check(dataframe):
                 except ValueError:
                     print('Invalid input')
             dataframe.at[index, 'price'] = new_price  # Overwrite the 'price' column
+
             cv2.destroyAllWindows()
     return dataframe

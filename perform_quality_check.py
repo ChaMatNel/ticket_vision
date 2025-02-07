@@ -3,7 +3,7 @@ import cv2
 
 def quality_check(dataframe):
     for index, row in dataframe.iterrows():
-        if row['confidence'] <= .8 or row['price'] < 10 or row['price'] > 2000 or row['ocr_conf'] <= 80:
+        if row['confidence'] <= .8 or row['price'] < 10 or row['price'] > 2000 or row['ocr_conf'] <= .7:
             # Load the image using cv2
             img_check = cv2.imread(row["file_path"])
 
@@ -21,11 +21,22 @@ def quality_check(dataframe):
             
             while True:
                 try:
-                    new_price = int(input("Enter a corrected price: "))  # Prompt user for new value
+                    # Prompt the user to keep the original price or enter a new one
+                    user_input = input("Enter a corrected price, or type 'y' to keep the current price: ")
+                    
+                    if user_input.lower() == 'y':
+                        # Keep the existing price
+                        new_price = row['price']
+                    else:
+                        # Convert user input to an integer (new price)
+                        new_price = int(user_input)
+                    
+                    # If the input was valid, break out of the loop
                     break
                 except ValueError:
-                    print('Invalid input')
-            dataframe.at[index, 'price'] = new_price  # Overwrite the 'price' column
+                    print('Invalid input, please enter a number or "y" to keep the current price.')
 
+            # Update the DataFrame with the new price
+            dataframe.at[index, 'price'] = new_price
             cv2.destroyAllWindows()
     return dataframe

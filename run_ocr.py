@@ -42,13 +42,13 @@ def run_ocr(df_detections):
 
         # Handle cases where OCR fails to detect text
         if text == "":
-            text = 99999 # Set to really high value that can be easily identified and manually corrected later
+            text = "99999" # Set to really high value that can be easily identified and manually corrected later
         
         # Add the OCR result to the DataFrame
         df_detections.at[index, "price"] = text.strip()
-        df_detections.at[index, "ocr_conf"] = confidence_score
-
-
-        # Restart the loop at the next row
+        # Add the confidence score
+        df_detections.at[index, "ocr_conf"] = confidence_score/100
+    
+         # Restart the loop at the next row
     
     return df_detections

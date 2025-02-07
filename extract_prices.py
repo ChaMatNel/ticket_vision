@@ -8,6 +8,9 @@ from PIL import Image
 import torch
 import pytesseract
 from openpyxl import load_workbook
+import matplotlib.pyplot as plt
+from matplotlib import colors
+import seaborn as sns
 
 # Import functions
 from preprocess_images import process_images
@@ -15,6 +18,7 @@ from run_model import run_model
 from run_ocr import run_ocr
 from transform_game_dataframe import transform_game_dataframe
 from perform_quality_check import quality_check
+from create_trend_graph import create_trend_graph
 
 
 # Define folder path
@@ -41,7 +45,7 @@ for game in os.listdir(main_folder):
 
         else:
             # If there isn't an Excel file, create a new pandas dataframe that will later be exported as an excel file
-            game_df = pd.DataFrame(columns=["file_path", "object_name", "x_min", "y_min", "x_max", "y_max", "confidence", "img_height", "img_width","ocr_conf", "price", "seat_location", "distance_to_center", "deal_score"])
+            game_df = pd.DataFrame(columns=["file_path", "object_name", "x_min", "y_min", "x_max", "y_max", "confidence", "img_height", "img_width","ocr_conf", "price", "seat_location", "distance_to_center", "deal_score", "snapshot_date", "days_to_game"])
         
         # Run the process_images function which resizes the image to a square
         process_images(game_path, game_path, size=800)
@@ -55,12 +59,19 @@ for game in os.listdir(main_folder):
                 detections_df = run_model(image_path)
                 # Run OCR on the ticket price tag snippets to extract the price
                 detections_prices_df = run_ocr(detections_df)
+
+                #clean price column
+                detections_prices_df['price'] = detections_prices_df['price'].str.extract('(\d+)')  # Extract only digits
+                detections_prices_df['price'] = detections_prices_df['price'].astype(float)  # Convert to float first if decimals are present
+                detections_prices_df['price'] = detections_prices_df['price'].fillna(0).astype(int)
+
                 # Run the transform_game_dataframe function which creates new calculated columns for later analysis
-                snapshot_df = transform_game_dataframe(detections_prices_df)
+                snapshot_df = quality_check(detections_prices_df)
                 # Run though all the snippets and manually check low confidence snippets
-                final_snapshot_df = quality_check(snapshot_df)
+                final_snapshot_df = transform_game_dataframe(snapshot_df)
                 # Add the game information to the main dataframe 
                 game_df = pd.concat([game_df, final_snapshot_df], ignore_index=True)
+                #need to do quality check before some of the data tansformations so deal score is accurate
                 
                 # Move the images to a "processed" folder
                 processed_path = os.path.join(game_path,'processed')
@@ -69,7 +80,10 @@ for game in os.listdir(main_folder):
                 os.rename(image_path, processed_image_path)
 
         # Define output file path
-        file_path = f'{game_path}\{game}.xlsx'
+        file_path = rf'{game_path}\{game}.xlsx'
+        png_path = rf'{game_path}\{game}.png'
+
+        #create_trend_graph(game_df, png_path)
 
         # Export the dataframe as an excel file
         try:
